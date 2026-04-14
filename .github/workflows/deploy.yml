@@ -1,0 +1,52 @@
+name: Deploy Azure Function
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  FUNCTION_APP_NAME: fruit-function-demo
+
+  # 🔹 Terraform needs these
+  ARM_CLIENT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
+  ARM_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
+  ARM_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+  ARM_TENANT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).tenantId }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # 🔹 Login to Azure
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # 🔹 Terraform setup (if you are using it)
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
+
+    # 🔹 Zip function app
+    - name: Zip Function App
+      run: |
+        cd function-app
+        zip -r ../function.zip .
+
+    # 🔹 Deploy Function
+    - name: Deploy Function
+      uses: Azure/functions-action@v1
+      with:
+        app-name: ${{ env.FUNCTION_APP_NAME }}
+        package: function.zip
