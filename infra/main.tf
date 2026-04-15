@@ -1,4 +1,4 @@
-provider "azurerm" {
+/* provider "azurerm" {
   features {}
 }
 
@@ -41,4 +41,4 @@ resource "azurerm_linux_function_app" "func" {
     FUNCTIONS_WORKER_RUNTIME = "python"
     APP_URL                  = "https://huggingface.co/spaces/sancloudmlops/flask-random-fruit.azurewebsites.net"
   }
-}
+} */
